@@ -11,7 +11,9 @@ const client = new Client({
     ]
 });
 
-//check if logs directory exists
+const timestamp = new Date().toLocaleString();
+
+//check logs directory
 const logsDir = path.join(__dirname, 'logs');
 if (!fs.existsSync(logsDir)) {
     fs.mkdirSync(logsDir);
@@ -19,15 +21,23 @@ if (!fs.existsSync(logsDir)) {
 
 function logToFile(message) {
     const logFile = path.join(logsDir, `boar.log`);
-    const timestamp = new Date().toLocaleString();
     const logMessage = `[${timestamp}] ${message}\n`;
     
     fs.appendFileSync(logFile, logMessage, 'utf8');
     console.log(logMessage.trim());
 }
 
+// alternative logToFile function with one log file per day
+//function logToFile(message) {
+//    const logFile = path.join(logsDir, `${new Date().toLocaleDateString}.log`);
+//    const logMessage = `[${timestamp}] ${message}\n`;
+//    
+//    fs.appendFileSync(logFile, logMessage, 'utf8');
+//    console.log(logMessage.trim());
+//}
+
 client.once('ready', () => {
-    logToFile(`[${new Date().toLocaleString()}] Logged in!`);
+    logToFile(`Logged in!`);
 });
 
 client.on('presenceUpdate', (oldPresence, newPresence) => {
@@ -46,14 +56,14 @@ client.on('presenceUpdate', (oldPresence, newPresence) => {
     const newStatus = newPresence.status;
 
     if (newStatus === 'offline' && oldStatus !== 'offline') {
-        logToFile(`[${new Date().toLocaleString()}] BoarBot went offline`);
+        logToFile(`BoarBot went offline`);
 
         const channel = client.channels.cache.get(process.env.CHANNEL);
 
         if (channel) {
             channel.send(`<@${process.env.PING}> BoarBot just went offline!`);
         } else {
-            logToFile(`[${new Date().toLocaleString()}] Channel not found`);
+            logToFile(`Channel not found`);
         }
     }
 });
