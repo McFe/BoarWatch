@@ -11,8 +11,6 @@ const client = new Client({
     ]
 });
 
-const timestamp = new Date().toLocaleString();
-
 //check logs directory
 const logsDir = path.join(__dirname, 'logs');
 if (!fs.existsSync(logsDir)) {
@@ -20,16 +18,18 @@ if (!fs.existsSync(logsDir)) {
 }
 
 function logToFile(message) {
-    const logFile = path.join(logsDir, `boar.log`);
+    const logFile = path.join(logsDir, `${new Date().getDate()}. ${new Date().getMonth()+1}. ${new Date().getFullYear()}.log`);
+    const timestamp = new Date().toLocaleString();
     const logMessage = `[${timestamp}] ${message}\n`;
     
     fs.appendFileSync(logFile, logMessage, 'utf8');
     console.log(logMessage.trim());
 }
 
-// alternative logToFile function with one log file per day
+// alternative logToFile function with only one log file
 //function logToFile(message) {
-//    const logFile = path.join(logsDir, `${new Date().toLocaleDateString}.log`);
+//    const logFile = path.join(logsDir, `boar.log`);
+//    const timestamp = new Date().toLocaleString();
 //    const logMessage = `[${timestamp}] ${message}\n`;
 //    
 //    fs.appendFileSync(logFile, logMessage, 'utf8');
@@ -37,7 +37,7 @@ function logToFile(message) {
 //}
 
 client.once('ready', () => {
-    logToFile(`Logged in!`);
+    logToFile(`Now watching BoarBot!`);
 });
 
 client.on('presenceUpdate', (oldPresence, newPresence) => {
@@ -55,7 +55,7 @@ client.on('presenceUpdate', (oldPresence, newPresence) => {
     const oldStatus = oldPresence?.status || 'offline';
     const newStatus = newPresence.status;
 
-    if (newStatus === 'offline' && oldStatus !== 'offline') {
+    if (newStatus === 'offline') {
         logToFile(`BoarBot went offline`);
 
         const channel = client.channels.cache.get(process.env.CHANNEL);
@@ -65,9 +65,21 @@ client.on('presenceUpdate', (oldPresence, newPresence) => {
         } else {
             logToFile(`Channel not found`);
         }
+    } if (oldStatus === 'offline' && newStatus === 'online') {
+        logToFile(`BoarBot went online`);
+
+        const channel = client.channels.cache.get(process.env.CHANNEL);
+
+        if (channel) {
+            channel.send(`BoarBot is back online!`);
+        } else {
+            logToFile(`Channel not found`);
+        }
     }
+
 });
 
 client.login(process.env.TOKEN).catch(error => {
-    logToFile('Failed to login:', error);
+    logToFile('Unable to login:', error);
+    console.error('Unable to login:', error);
 });
