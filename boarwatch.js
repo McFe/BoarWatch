@@ -3,6 +3,14 @@ const fs = require('fs');
 const path = require('path');
 const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
 
+const requiredEnvVars = ['TOKEN', 'BOT', 'SERVER', 'CHANNEL', 'PING'];
+requiredEnvVars.forEach((varName) => {
+    if (!process.env[varName]) {
+        console.error(`Missing required environment variable: ${varName}`);
+        process.exit(1);
+    }
+});
+
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -41,9 +49,7 @@ client.once('ready', () => {
 
     client.user.setActivity({
         name: 'BoarBot',
-        type: ActivityType.WATCHING
-    }).catch(error => {
-        logToFile('Unable to set activity:', error);
+        type: ActivityType.Watching
     });
 });
 
@@ -72,7 +78,7 @@ client.on('presenceUpdate', (oldPresence, newPresence) => {
         } else {
             logToFile(`Channel not found`);
         }
-    } if (oldStatus === 'offline' && newStatus === 'online') {
+    } else if (oldStatus === 'offline' && newStatus === 'online') {
         logToFile(`BoarBot went online`);
 
         const channel = client.channels.cache.get(process.env.CHANNEL);
