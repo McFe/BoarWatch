@@ -1,7 +1,7 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
 
 const client = new Client({
     intents: [
@@ -38,6 +38,13 @@ function logToFile(message) {
 
 client.once('ready', () => {
     logToFile(`Now watching BoarBot!`);
+
+    client.user.setActivity({
+        name: 'BoarBot',
+        type: ActivityType.WATCHING
+    }).catch(error => {
+        logToFile('Unable to set activity:', error);
+    });
 });
 
 client.on('presenceUpdate', (oldPresence, newPresence) => {
